@@ -46,6 +46,8 @@ pip install -r ~/iPipet/requirements.txt
 
 ## Start the service
 
+Note: In `pooling.sh` you will want to edit the `BIND_IP` option to `0.0.0.0` if you wish to make the service available outside of localhost, and you may wish to use a port other than `5105`. However, one option is to use a load balancer in front of the service, like ngnix, and route that to `127.0.0.1:5105`.
+
 Run the flask app with gunicorn as user ipipet:
 ```
 sudo su -
