@@ -18,7 +18,7 @@ copyright (c) 2014 Dina Zielinski (dina@wi.mit.edu)
 """
 
 from flask import Flask, url_for, request, redirect, jsonify, render_template, make_response
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 from lockfile import LockFile
 import markdown
 import string
@@ -165,7 +165,9 @@ def add_shared_community_design(description,id,plate_type,pipet_type):
         with lock:
             data = []
             try:
-                data = json.load(file(community_public_file))
+                json_file = open(community_public_file)
+                data = json.load(json_file)
+                json_file.close()
             except:
                 pass
             data.append( { "description" : description, "id": id, "plate_type": plate_type, "pipet_type": pipet_type } )
@@ -221,10 +223,10 @@ def load_plating_csv(plate_type, filename):
                         int(row[3]),             # 6. Destination Well number (1-96)
                         well_num_to_name(row[3])]# 7. Destination Well Name (e.g. "F11")
 
-		if len(row) >= 5:
-			temp.append(float(row[4]))           # 8. volume
-		if len(row) >= 6:
-			temp.append(row[5])      # 9. Specimen Name
+                if len(row) >= 5:
+                    temp.append(float(row[4]))   # 8. volume
+                if len(row) >= 6:
+                    temp.append(row[5])          # 9. Specimen Name
 
                 data.append(temp)
             return data
@@ -385,7 +387,10 @@ def sendemail(email,description,link):
 @app.route('/show/<id>')
 def show(id):
     json_path,csv_path = files_from_id(id)
-    info = json.load(file(json_path))
+    json_file = open(json_path)
+    info = json.load(json_file)
+    json_file.close()
+    # info = json.load(file(json_path))
     
     return render_template('show.html', info=info)
 
@@ -422,7 +427,10 @@ def run(id):
     # We dont really need this info,
     # but the function will validate that the ID exists.
     json_path,csv_path = files_from_id(id)
-    info = json.load(file(json_path))
+    json_file = open(json_path)
+    info = json.load(json_file)
+    json_file.close()
+    # info = json.load(file(json_path))
     
 
     data_url = url_for("data",id=id)
@@ -431,7 +439,10 @@ def run(id):
 @app.route('/data/<id>')
 def data(id):
     json_path,csv_path = files_from_id(id)
-    info = json.load(file(json_path))
+    json_file = open(json_path)
+    info = json.load(json_file)
+    json_file.close()
+    # info = json.load(file(json_path))
     foo = info[u"plate_type"];
     data = load_plating_csv(foo,csv_path)
     return jsonify(data=data)
@@ -450,8 +461,12 @@ def community():
     data = []
     data.extend(default_shared_designs)
     try:
-        tmp = json.load(file(community_public_file))
-        data.extend(tmp)
+        json_file = open(community_public_file)
+        data = json.load(json_file)
+        json_file.close()
+        data.extend(data)
+        # tmp = json.load(file(community_public_file))
+        # data.extend(tmp)
     except:
         pass
     return render_template("community.html",data=data)
